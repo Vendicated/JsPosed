@@ -7,7 +7,7 @@ A javascript patching library inspired by Xposed
 ```sh
 npm install jsposed
 
-pnpm install jsposed
+pnpm add jsposed
 
 yarn add jsposed
 ```
@@ -17,7 +17,7 @@ yarn add jsposed
 For more examples on real functions, check [tests/index.js](tests/index.js)
 
 ```js
-const Patcher = require("jsposed");
+const { Patcher } = require("jsposed");
 
 const patcher = new Patcher();
 
