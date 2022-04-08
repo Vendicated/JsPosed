@@ -1,0 +1,23 @@
+{
+    "name": "jsposed",
+    "version": "1.0.0",
+    "description": "Javascript patching library inspired by Xposed",
+    "main": "dist/index.js",
+    "directories": {
+        "example": "example"
+    },
+    "scripts": {
+        "test": "node tests"
+    },
+    "keywords": [
+        "Xposed",
+        "javascript",
+        "patching",
+        "hook"
+    ],
+    "author": "Vendicated",
+    "license": "OSL-3.0",
+    "devDependencies": {
+        "@types/node": "^17.0.23"
+    }
+}

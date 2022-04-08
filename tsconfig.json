@@ -1,0 +1,24 @@
+{
+	"compileOnSave": true,
+	"compilerOptions": {
+		"allowSyntheticDefaultImports": true,
+		"declaration": false,
+		"emitDecoratorMetadata": true,
+		"esModuleInterop": false,
+		"experimentalDecorators": true,
+		"forceConsistentCasingInFileNames": true,
+		"incremental": true,
+		"inlineSourceMap": true,
+		"inlineSources": false,
+		"lib": ["esnext"],
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"noEmitOnError": true,
+		"outDir": "dist",
+		"strict": true,
+		"target": "es6",
+		"typeRoots": ["types"],
+        "types": ["node"]
+	},
+    "include": ["src/index.ts", "src/**/*.ts"]
+}
