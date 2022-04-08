@@ -1,26 +1,26 @@
 {
-  "name": "jsposed",
-  "version": "1.0.0",
-  "description": "Javascript patching library inspired by Xposed",
-  "keywords": [
-    "Xposed",
-    "javascript",
-    "patching",
-    "hook"
-  ],
-  "license": "OSL-3.0",
-  "author": "Vendicated",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "directories": {
-    "example": "example"
-  },
-  "scripts": {
-    "prepublish": "tsc",
-    "test": "node tests"
-  },
-  "devDependencies": {
-    "@types/node": "^17.0.23",
-    "typescript": "^4.6.3"
-  }
+    "name": "jsposed",
+    "version": "1.0.2",
+    "description": "Javascript patching library inspired by Xposed",
+    "keywords": [
+        "Xposed",
+        "javascript",
+        "patching",
+        "hook"
+    ],
+    "license": "OSL-3.0",
+    "author": "Vendicated",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "directories": {
+        "example": "example"
+    },
+    "scripts": {
+        "prepublish": "tsc",
+        "test": "node tests"
+    },
+    "devDependencies": {
+        "@types/node": "^17.0.23",
+        "typescript": "^4.6.3"
+    }
 }

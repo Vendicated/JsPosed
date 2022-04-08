@@ -46,7 +46,7 @@ export default class PatchInfo<T> {
         let idx = 0;
         do {
             try {
-                patches[idx].before(ctx);
+                patches[idx].before(ctx, ...ctx.args);
             } catch (err: any) {
                 // TODO: Log error
 
@@ -75,7 +75,7 @@ export default class PatchInfo<T> {
             const lastError = ctx.error;
 
             try {
-                patches[idx].after(ctx);
+                patches[idx].after(ctx, ...ctx.args);
             } catch (err: any) {
                 if (lastError !== null) {
                     ctx.error = lastError;

@@ -8,7 +8,7 @@ import { Patch, PatchPriority, Unpatch } from "./patch";
 import PatchInfo from "./PatchInfo";
 import { InsteadFn, PatchFn } from "./types";
 
-export const patchInfoSym = Symbol("patchInfo");
+const patchInfoSym = Symbol("patchInfo");
 
 function getMethod(obj: any, methodName: String) {
     if (obj == null) throw new Error("obj may not be null or undefined");
@@ -23,12 +23,26 @@ function getMethod(obj: any, methodName: String) {
 export default class Patcher {
     private _unpatches = [] as Unpatch<any>[];
 
+    /**
+     * Call the original method, bypassing all patches
+     * @param method The method to call
+     * @param thisObject The `this` to call the method with
+     * @param args The arguments to pass to the method
+     * @returns Result of the method
+     */
     public callOriginal<T>(method: (...args: any[]) => T, thisObject: any, ...args: any[]): T {
         if (typeof method !== "function") throw new Error("method must be a function");
         const actual = (method[patchInfoSym as keyof typeof method] as PatchInfo<any>)?.backup ?? method;
         return actual.call(thisObject, ...args);
     }
 
+    /**
+     * Patch a method
+     * @param obj Object holding the method
+     * @param methodName Name of the method
+     * @param patch Patch
+     * @returns Unpatch
+     */
     public patch<T>(obj: T, methodName: string, patch: Patch<T>) {
         const method = getMethod(obj, methodName);
         let patchInfo = method[patchInfoSym] as PatchInfo<T>;
@@ -53,6 +67,12 @@ export default class Patcher {
         return unpatch;
     }
 
+    /**
+     * Remove a patch
+     * @param obj Object holding the method
+     * @param methodName Method name
+     * @param patch Patch to remove
+     */
     public unpatch<T>(obj: T, methodName: string, patch: Patch<T>) {
         const method = getMethod(obj, methodName);
         const patchInfo = method[patchInfoSym] as PatchInfo<T>;
@@ -65,6 +85,9 @@ export default class Patcher {
         }
     }
 
+    /**
+     * Remove all patches
+     */
     public unpatchAll() {
         for (const unpatch of this._unpatches) {
             unpatch.unpatch();
@@ -72,18 +95,50 @@ export default class Patcher {
         this._unpatches = [];
     }
 
+    /**
+     * Add a patch that will run before the original method
+     * @param obj Object holding the method
+     * @param methodName Method name
+     * @param before Patch
+     * @param priority Patch priority
+     * @returns
+     */
     public before<T>(obj: T, methodName: string, before: PatchFn<T>, priority = PatchPriority.DEFAULT): Unpatch<T> {
         return this.patch(obj, methodName, new Patch({ before, priority }));
     }
 
+    /**
+     * Add a patch that will run instead of the original method
+     * @param obj Object holding the method
+     * @param methodName Method name
+     * @param instead Patch
+     * @param priority Patch priority
+     * @returns
+     */
     public instead<T>(obj: T, methodName: string, instead: InsteadFn<T>, priority = PatchPriority.DEFAULT) {
         return this.patch(obj, methodName, new Patch({ instead, priority }));
     }
 
+    /**
+     * Add a patch that will run after the original method
+     * @param obj Object holding the method
+     * @param methodName Method name
+     * @param after Patch
+     * @param priority Patch priority
+     * @returns
+     */
     public after<T>(obj: any, methodName: string, after: PatchFn<T>, priority = PatchPriority.DEFAULT): Unpatch<T> {
         return this.patch(obj, methodName, new Patch({ after, priority }));
     }
 
+    /**
+     * Replace a method inline. Useful to replace single instructions.
+     * Very experimental for now, cannot be unpatched and won't work on patched methods.
+     * @param obj Object holding the method
+     * @param methodName Name of the method
+     * @param replacement Object containing a match property. Should contain a match and replace property
+     *                    whose form is similar to the first and second argument of String.replace
+     */
     public inlineReplace(
         obj: any,
         methodName: string,
