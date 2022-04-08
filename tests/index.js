@@ -1,3 +1,9 @@
+/*
+ * JsPosed, a Javascript patching library inspired by Xposed
+ * Copyright (c) 2022 Vendicated
+ * Licensed under the Open Software License version 3.0
+ */
+
 const assert = require("assert/strict");
 const { Patcher } = require("..");
 const { PatchPriority } = require("../dist/patch");

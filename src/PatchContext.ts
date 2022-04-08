@@ -1,3 +1,9 @@
+/*
+ * JsPosed, a Javascript patching library inspired by Xposed
+ * Copyright (c) 2022 Vendicated
+ * Licensed under the Open Software License version 3.0
+ */
+
 export default class PatchContext<T> {
     private _result: any = null;
     private _error: any = null;

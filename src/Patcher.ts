@@ -1,3 +1,9 @@
+/*
+ * JsPosed, a Javascript patching library inspired by Xposed
+ * Copyright (c) 2022 Vendicated
+ * Licensed under the Open Software License version 3.0
+ */
+
 import { Patch, PatchPriority, Unpatch } from "./patch";
 import PatchInfo from "./PatchInfo";
 import { InsteadFn, PatchFn } from "./types";
