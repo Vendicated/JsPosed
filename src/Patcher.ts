@@ -27,7 +27,11 @@ function getMethod(obj: any, methodName: String) {
 export class Patcher {
     /**
      * @param name A custom error for this patcher. This will be used for logging errors
-     * @param handleError A custom error handler. If not specified, `console.error` will be used to print the patcher name, method name, and the error
+     * @param handleError A custom error handler. If not specified, `console.error` will be used to print the following info:
+     *          - patcher name (defaults to "JsPosed")
+     *          - method name
+     *          - the caught error
+     *          - the patch callback that threw this error
      */
     public constructor(
         public readonly name = "JsPosed",
@@ -37,8 +41,13 @@ export class Patcher {
             this.handleError = handleError;
     }
 
-    public handleError(kind: "before" | "after", info: PatchInfo<any>, err: any) {
-        console.error(`Patcher[${this.name}] Error in ${kind} patch of method ${info.methodName}`, err);
+    public handleError<T>(kind: "before" | "after", info: PatchInfo<T>, err: any, patch: Patch<T>) {
+        console.error(
+            `[Patcher<${this.name}>] Error in ${kind} patch of method "${info.methodName}"\n`,
+            err,
+            "\nFaulty Callback:",
+            patch[kind]
+        );
     }
 
     private _unpatches = [] as Unpatch<any>[];

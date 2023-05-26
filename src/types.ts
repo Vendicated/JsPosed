@@ -6,8 +6,9 @@
 
 import { PatchContext } from "./PatchContext";
 import { PatchInfo } from "./PatchInfo";
+import { Patch } from "./patch";
 
 export type Func = (...args: any[]) => any;
 export type PatchFn<T> = (ctx: PatchContext<T>, ...args: any[]) => void;
 export type InsteadFn<T> = (ctx: PatchContext<T>, ...args: any[]) => any;
-export type OnPatchError = (kind: "before" | "after", info: PatchInfo<any>, err: any) => void;
+export type OnPatchError = <T>(kind: "before" | "after", info: PatchInfo<T>, err: any, patch: Patch<T>) => void;

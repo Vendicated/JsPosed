@@ -57,7 +57,7 @@ export class PatchInfo<T> {
             try {
                 patches[idx].before(ctx, ...ctx.args);
             } catch (err: any) {
-                this.patcher.handleError("before", this, err);
+                this.patcher.handleError("before", this, err, patches[idx]);
 
                 ctx.result = null;
                 ctx._returnEarly = false;
@@ -86,7 +86,7 @@ export class PatchInfo<T> {
             try {
                 patches[idx].after(ctx, ...ctx.args);
             } catch (err: any) {
-                this.patcher.handleError("after", this, err);
+                this.patcher.handleError("after", this, err, patches[idx]);
 
                 if (lastError !== null) {
                     ctx.error = lastError;
