@@ -71,10 +71,9 @@ export class Patcher {
         if (!patchInfo) {
             patchInfo = new PatchInfo(this, obj, methodName, method);
 
-            const objAsAny = obj as any;
-            objAsAny[methodName] = patchInfo.makeReplacementFunc();
-            Object.defineProperties(objAsAny[methodName], Object.getOwnPropertyDescriptors(method));
-            Object.defineProperty(objAsAny[methodName], patchInfoSym, {
+            const replacement = (obj as any)[methodName] = patchInfo.makeReplacementFunc();
+            Object.defineProperties(replacement, Object.getOwnPropertyDescriptors(method));
+            Object.defineProperty(replacement, patchInfoSym, {
                 value: patchInfo,
                 enumerable: false,
                 writable: true,
