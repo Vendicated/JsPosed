@@ -82,12 +82,17 @@ stage(patcher => {
     assert.equal(obj.add(1, 2), 2);
 });
 
-// TEST CUSTOM ERROR HANDLER
+// TEST ERROR HANDLING
 stage(patcher => {
     let passedTest = false;
 
     const patcherWithCustomError = new Patcher("j", (kind, info, err) => {
         passedTest = true;
+        assert(err instanceof Error);
+        assert.equal(kind, "before");
+        assert.equal(info.methodName, "add");
+        assert.equal(info.targetObject, obj);
+        assert.equal(info.patcher.name, "j");
     });
 
     patcherWithCustomError.before(obj, "add", param => {
@@ -95,7 +100,9 @@ stage(patcher => {
     });
 
     obj.add(1, 2);
+
     assert(passedTest);
+    assert.doesNotThrow(() => obj.add(1, 2));
 
     patcherWithCustomError.unpatchAll();
 });
