@@ -14,6 +14,8 @@ export enum PatchPriority {
     MAX = 30
 }
 
+function NOOP() { };
+
 export class Patch<T> {
     public before: PatchFn<T>;
     public after: PatchFn<T>;
@@ -25,8 +27,6 @@ export class Patch<T> {
             throw new Error("Priority must be between PatchPriority.MIN and PatchPriority.MAX");
         }
 
-        const defaultFn = (ctx: PatchContext<T>) => void 0;
-
         if (data.instead) {
             if (data.after || data.before) {
                 throw new Error("Instead patches cannot specify before or after patches.");
@@ -36,10 +36,10 @@ export class Patch<T> {
             this.before = (ctx: PatchContext<T>) => {
                 ctx.result = instead(ctx);
             };
-            this.after = defaultFn;
+            this.after = NOOP;
         } else {
-            this.before = data.before ?? defaultFn;
-            this.after = data.after ?? defaultFn;
+            this.before = data.before ?? NOOP;
+            this.after = data.after ?? NOOP;
         }
     }
 }
