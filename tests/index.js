@@ -5,8 +5,7 @@
  */
 
 const assert = require("assert/strict");
-const { Patcher } = require("..");
-const { PatchPriority } = require("../dist/patch");
+const { Patcher, PatchPriority } = require("..");
 
 const obj = {
     add(x, y) {
@@ -47,19 +46,9 @@ assert.equal(obj.getAdd(), obj.add);
 // TEST CALL ORIGINAL
 assert.equal(patcher.callOriginal(obj.add, obj, 1, 2), 3);
 
-// TEST INLINE REPLACE
-assert.equal(obj.addAndMultiplyBy12(1, 2), 3 * 12);
-patcher.inlineReplace(obj, "addAndMultiplyBy12", {
-    match: /\*= (\d+)/,
-    replace: (_, x) => "*= " + x * 2
-});
-assert.equal(obj.addAndMultiplyBy12(1, 2), 3 * 12 * 2);
-
 // TEST UNPATCHALL
 patcher.unpatchAll();
 assert.equal(obj.add(1, 2), 3);
-// TODO: Unpatch this as well
-assert.equal(obj.addAndMultiplyBy12(1, 2), 3 * 12 * 2);
 
 // TEST THROW
 patcher.after(obj, "add", (param) => (param.error = new Error("test")));

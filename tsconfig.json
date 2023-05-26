@@ -11,12 +11,7 @@
     "outDir": "dist",
     "strict": true,
     "target": "es6",
-    "types": [
-      "node"
-    ]
+    "lib": ["esnext", "DOM"]
   },
-  "include": [
-    "src/index.ts",
-    "src/**/*.ts"
-  ]
+  "include": ["src/index.ts", "src/**/*.ts"]
 }

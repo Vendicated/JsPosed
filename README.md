@@ -12,6 +12,8 @@ pnpm add jsposed
 yarn add jsposed
 ```
 
+### Usage
+
 ### Examples
 
 For more examples on real functions, check [tests/index.js](tests/index.js)

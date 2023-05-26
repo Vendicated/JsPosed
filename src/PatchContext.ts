@@ -4,12 +4,12 @@
  * Licensed under the Open Software License version 3.0
  */
 
-export default class PatchContext<T> {
+export class PatchContext<T> {
     private _result: any = null;
     private _error: any = null;
     _returnEarly = false;
 
-    public constructor(public readonly thisObject: T, public args: any) {}
+    public constructor(public readonly thisObject: T, public args: any) { }
 
     /**
      * Get the result. Null in beforePatch

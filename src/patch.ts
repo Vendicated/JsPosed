@@ -4,8 +4,8 @@
  * Licensed under the Open Software License version 3.0
  */
 
-import PatchContext from "./PatchContext";
-import Patcher from "./Patcher";
+import { PatchContext } from "./PatchContext";
+import { Patcher } from "./Patcher";
 import { InsteadFn, PatchFn } from "./types";
 
 export enum PatchPriority {
@@ -19,7 +19,7 @@ export class Patch<T> {
     public after: PatchFn<T>;
     public priority: number;
 
-    public constructor(data: Partial<Patch<T>> & { instead?: InsteadFn<T> }) {
+    public constructor(data: Partial<Patch<T>> & { instead?: InsteadFn<T>; }) {
         this.priority = data.priority ?? PatchPriority.DEFAULT;
         if (this.priority < PatchPriority.MIN || this.priority > PatchPriority.MAX) {
             throw new Error("Priority must be between PatchPriority.MIN and PatchPriority.MAX");
@@ -45,7 +45,7 @@ export class Patch<T> {
 }
 
 export class Unpatch<T> {
-    public constructor(private patcher: Patcher, public obj: T, public methodName: string, public patch: Patch<T>) {}
+    public constructor(private patcher: Patcher, public obj: T, public methodName: string, public patch: Patch<T>) { }
 
     public unpatch() {
         this.patcher.unpatch(this.obj, this.methodName, this.patch);

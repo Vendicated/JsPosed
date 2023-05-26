@@ -5,22 +5,42 @@
  */
 
 import { Patch, PatchPriority, Unpatch } from "./patch";
-import PatchInfo from "./PatchInfo";
-import { InsteadFn, PatchFn } from "./types";
+import { PatchInfo } from "./PatchInfo";
+import { InsteadFn, OnPatchError, PatchFn } from "./types";
 
-const patchInfoSym = Symbol("patchInfo");
+const patchInfoSym = Symbol.for("jsposed.patchInfo");
 
 function getMethod(obj: any, methodName: String) {
-    if (obj == null) throw new Error("obj may not be null or undefined");
-    if (typeof methodName !== "string" || !methodName) throw new Error("methodName must be a non empty string");
+    if (obj == null)
+        throw new Error("obj may not be null or undefined");
 
     const method = obj[methodName as any];
-    if (method == null) throw new Error("No such method: " + methodName);
-    if (typeof method !== "function") throw new Error(methodName + " is not a function");
+    if (method == null)
+        throw new Error("No such method: " + methodName);
+
+    if (typeof method !== "function")
+        throw new Error(methodName + " is not a function");
+
     return method;
 }
 
-export default class Patcher {
+export class Patcher {
+    /**
+     * @param name A custom error for this patcher. This will be used for logging errors
+     * @param handleError A custom error handler. If not specified, `console.error` will be used to print the patcher name, method name, and the error
+     */
+    public constructor(
+        public readonly name = "JsPosed",
+        handleError?: OnPatchError
+    ) {
+        if (handleError)
+            this.handleError = handleError;
+    }
+
+    public handleError(kind: "before" | "after", info: PatchInfo<any>, err: any) {
+        console.error(`Patcher[${this.name}] Error in ${kind} patch of method ${info.methodName}`, err);
+    }
+
     private _unpatches = [] as Unpatch<any>[];
 
     /**
@@ -31,8 +51,10 @@ export default class Patcher {
      * @returns Result of the method
      */
     public callOriginal<T>(method: (...args: any[]) => T, thisObject: any, ...args: any[]): T {
-        if (typeof method !== "function") throw new Error("method must be a function");
-        const actual = (method[patchInfoSym as keyof typeof method] as PatchInfo<any>)?.backup ?? method;
+        if (typeof method !== "function")
+            throw new Error("method must be a function");
+
+        const actual = (method[patchInfoSym as keyof typeof method] as PatchInfo<any>)?.original ?? method;
         return actual.call(thisObject, ...args);
     }
 
@@ -47,13 +69,12 @@ export default class Patcher {
         const method = getMethod(obj, methodName);
         let patchInfo = method[patchInfoSym] as PatchInfo<T>;
         if (!patchInfo) {
-            patchInfo = new PatchInfo(method);
-            // @ts-ignore
-            obj[methodName] = patchInfo.makeReplacementFunc();
-            // @ts-ignore
-            Object.assign(obj[methodName], method);
-            // @ts-ignore
-            Object.defineProperty(obj[methodName], patchInfoSym, {
+            patchInfo = new PatchInfo(this, obj, methodName, method);
+
+            const objAsAny = obj as any;
+            objAsAny[methodName] = patchInfo.makeReplacementFunc();
+            Object.defineProperties(objAsAny[methodName], Object.getOwnPropertyDescriptors(method));
+            Object.defineProperty(objAsAny[methodName], patchInfoSym, {
                 value: patchInfo,
                 enumerable: false,
                 writable: true,
@@ -79,8 +100,7 @@ export default class Patcher {
         if (patchInfo) {
             patchInfo.removePatch(patch);
             if (patchInfo.patchCount === 0) {
-                // @ts-ignore
-                obj[methodName] = patchInfo.backup;
+                (obj as any)[methodName] = patchInfo.original;
             }
         }
     }
@@ -129,42 +149,5 @@ export default class Patcher {
      */
     public after<T>(obj: any, methodName: string, after: PatchFn<T>, priority = PatchPriority.DEFAULT): Unpatch<T> {
         return this.patch(obj, methodName, new Patch({ after, priority }));
-    }
-
-    /**
-     * Replace a method inline. Useful to replace single instructions.
-     * Very experimental for now, cannot be unpatched and won't work on patched methods.
-     * @param obj Object holding the method
-     * @param methodName Name of the method
-     * @param replacement Object containing a match property. Should contain a match and replace property
-     *                    whose form is similar to the first and second argument of String.replace
-     */
-    public inlineReplace(
-        obj: any,
-        methodName: string,
-        replacement: {
-            match: string | RegExp;
-            replace: string | ((substring: String, ...args: any[]) => string);
-        }
-    ) {
-        const method = getMethod(obj, methodName);
-        const code = String(method);
-        let matched = false;
-        let newCode: string;
-        newCode = code.replace(replacement.match, (m, ...args) => {
-            matched = true;
-            return typeof replacement.replace === "string" ? replacement.replace : replacement.replace(m, ...args);
-        });
-        if (!matched || code === newCode) throw new Error("Replacement did nothing");
-        if (/^.+?\(.*?\)\s*\{/.test(newCode)) {
-            newCode = "function " + newCode;
-        }
-        newCode = "() => " + newCode;
-        try {
-            const newFunc = eval(newCode)();
-            obj[methodName] = newFunc;
-        } catch (err: unknown) {
-            throw new Error("Failed to compile new function. Code:\n" + newCode + "\n\nError:\n" + err);
-        }
     }
 }

@@ -5,28 +5,35 @@
  */
 
 import { Patch } from "./patch";
-import PatchContext from "./PatchContext";
+import { PatchContext } from "./PatchContext";
+import type { Patcher } from "./Patcher";
 import { Func } from "./types";
 
-export default class PatchInfo<T> {
-    private _patches = [] as Patch<T>[];
-    public constructor(public backup: Func) {}
+export class PatchInfo<T> {
+    public patches = [] as Patch<T>[];
+
+    public constructor(
+        public readonly patcher: Patcher,
+        public readonly targetObject: T,
+        public readonly methodName: string,
+        public readonly original: Func
+    ) { }
 
     public get patchCount() {
-        return this._patches.length;
+        return this.patches.length;
     }
 
     public addPatch(patch: Patch<T>) {
-        if (this._patches.includes(patch)) return false;
-        this._patches.push(patch);
-        this._patches.sort((a, b) => b.priority - a.priority);
+        if (this.patches.includes(patch)) return false;
+        this.patches.push(patch);
+        this.patches.sort((a, b) => b.priority - a.priority);
         return true;
     }
 
     public removePatch(patch: Patch<T>) {
-        const idx = this._patches.indexOf(patch);
+        const idx = this.patches.indexOf(patch);
         if (idx === -1) return false;
-        this._patches.splice(idx, 1);
+        this.patches.splice(idx, 1);
         return true;
     }
 
@@ -38,8 +45,10 @@ export default class PatchInfo<T> {
     }
 
     private _callback(thisObject: any, ...args: any[]) {
-        const patches = this._patches;
-        if (!patches.length) return this.backup.call(thisObject, ...args);
+        const { patches } = this;
+
+        if (!patches.length)
+            return this.original.call(thisObject, ...args);
 
         const ctx = new PatchContext(thisObject, args);
 
@@ -48,7 +57,7 @@ export default class PatchInfo<T> {
             try {
                 patches[idx].before(ctx, ...ctx.args);
             } catch (err: any) {
-                // TODO: Log error
+                this.patcher.handleError("before", this, err);
 
                 ctx.result = null;
                 ctx._returnEarly = false;
@@ -63,7 +72,7 @@ export default class PatchInfo<T> {
 
         if (!ctx._returnEarly) {
             try {
-                ctx.result = this.backup.call(ctx.thisObject, ...ctx.args);
+                ctx.result = this.original.call(ctx.thisObject, ...ctx.args);
             } catch (err: any) {
                 ctx.error = err;
             }
@@ -77,6 +86,8 @@ export default class PatchInfo<T> {
             try {
                 patches[idx].after(ctx, ...ctx.args);
             } catch (err: any) {
+                this.patcher.handleError("after", this, err);
+
                 if (lastError !== null) {
                     ctx.error = lastError;
                 } else {
