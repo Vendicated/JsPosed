@@ -1,6 +1,6 @@
 {
     "name": "jsposed",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Javascript patching library inspired by Xposed",
     "keywords": [
         "Xposed",
