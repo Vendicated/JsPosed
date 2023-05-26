@@ -39,7 +39,7 @@ There are three types of patches:
 - instead: Runs **instead of** the original method. This will entirely skip the original method and requires you to return your own result if applicable
 - after: Runs **after** the original method and thus has access to the result returned by it
 
-You can either use the shortcut methods `patcher.before`, `patcher.instead` and `patcher.after`:
+You can either use the shortcut methods `patcher.before`, `patcher.instead` and `patcher.after`...:
 ```js
 patcher.before(window, "open", (context) => {
     console.log("before window.open", context.args[0]);
@@ -51,7 +51,7 @@ patcher.after(window, "open", (context) => {
 })
 ```
 
-or if you want to use both before and after more concisely, you may also create your own patch directly:
+...or if you want to use both before and after more concisely, you may also create your own patch directly:
 ```js
 patcher.patch(window, "open", new Patch({
     before(context) { },
